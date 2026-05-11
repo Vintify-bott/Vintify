@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vintify — Bot Vinted clé en main</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #00c96b;
+    --green-dark: #00a857;
+    --green-glow: rgba(0,201,107,0.15);
+    --bg: #0b0d0f;
+    --bg2: #111417;
+    --bg3: #181c20;
+    --border: rgba(255,255,255,0.07);
+    --text: #f0f0ec;
+    --muted: #8a8f99;
+    --white: #ffffff;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 2.5rem;
+    background: rgba(11,13,15,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: var(--white);
+    letter-spacing: -0.02em;
+  }
+
+  .logo span { color: var(--green); }
+
+  nav a.btn-nav {
+    background: var(--green);
+    color: #000;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.55rem 1.3rem;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  nav a.btn-nav:hover { background: var(--green-dark); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -120px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,201,107,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,201,107,0.1);
+    border: 1px solid rgba(0,201,107,0.3);
+    color: var(--green);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.35rem 1rem;
+    border-radius: 50px;
+    margin-bottom: 2rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .badge::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--white);
+    max-width: 800px;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--green);
+  }
+
+  .hero-sub {
+    font-size: 1.15rem;
+    color: var(--muted);
+    max-width: 520px;
+    margin-bottom: 3rem;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  .cta-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-primary {
+    background: var(--green);
+    color: #000;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 0.85rem 2rem;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: transform 0.2s, background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary:hover { background: var(--green-dark); transform: translateY(-2px); }
+
+  .btn-secondary {
+    color: var(--muted);
+    font-size: 0.95rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .btn-secondary:hover { color: var(--text); }
+
+  /* PREVIEW DISCORD */
+  .discord-preview {
+    margin-top: 4rem;
+    background: #1e2124;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 1.5rem;
+    max-width: 520px;
+    width: 100%;
+    text-align: left;
+    position: relative;
+  }
+
+  .discord-preview::before {
+    content: 'Aperçu Discord';
+    position: absolute;
+    top: -11px; left: 20px;
+    background: var(--bg);
+    padding: 0 8px;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .dc-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .dc-avatar {
+    width: 36px; height: 36px;
+    background: var(--green);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #000;
+  }
+
+  .dc-name { font-weight: 500; font-size: 0.9rem; color: #fff; }
+  .dc-time { font-size: 0.75rem; color: var(--muted); margin-left: 6px; }
+
+  .dc-embed {
+    border-left: 4px solid var(--green);
+    background: #2b2d31;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 14px;
+  }
+
+  .dc-title { font-weight: 500; font-size: 0.95rem; color: #fff; margin-bottom: 10px; }
+
+  .dc-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .dc-field label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+  }
+  .dc-field span { font-size: 0.85rem; color: var(--text); }
+
+  .dc-img {
+    width: 100%;
+    height: 120px;
+    background: linear-gradient(135deg, #2c2f36, #1a1d21);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .dc-buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .dc-btn {
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  .dc-btn.fav { background: #5865f2; color: #fff; }
+  .dc-btn.msg { background: #3ba55c; color: #fff; }
+  .dc-btn.link { background: #4f545c; color: #fff; }
+
+  /* FEATURES */
+  section { padding: 5rem 2rem; }
+
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  .section-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--green);
+    font-weight: 500;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    letter-spacing: -0.02em;
+    color: var(--white);
+    text-align: center;
+    margin-bottom: 1rem;
+    line-height: 1.15;
+  }
+
+  .section-sub {
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 3.5rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .feature-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.8rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .feature-card:hover {
+    border-color: rgba(0,201,107,0.3);
+    transform: translateY(-3px);
+  }
+
+  .feat-icon {
+    width: 44px; height: 44px;
+    background: var(--green-glow);
+    border: 1px solid rgba(0,201,107,0.2);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 1.2rem;
+  }
+
+  .feature-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-card p {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* PRICING */
+  .pricing-section { background: var(--bg2); }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .price-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .price-card.featured {
+    border-color: var(--green);
+    background: linear-gradient(135deg, #0b160f 0%, var(--bg3) 100%);
+  }
+
+  .popular-badge {
+    position: absolute;
+    top: -13px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--green);
+    color: #000;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+
+  .price-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+
+  .price-amount {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 3rem;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+
+  .price-amount span {
+    font-size: 1.2rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .price-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 1.8rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .price-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 2rem;
+  }
+
+  .price-features li {
+    font-size: 0.9rem;
+    color: var(--muted);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .price-features li::before {
+    content: '✓';
+    color: var(--green);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .price-features li.highlight { color: var(--text); }
+
+  .btn-buy {
+    display: block;
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 50px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn-buy.outlined {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-buy.outlined:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04); }
+
+  .btn-buy.solid {
+    background: var(--green);
+    color: #000;
+  }
+  .btn-buy.solid:hover { background: var(--green-dark); transform: translateY(-1px); }
+
+  /* INCLUDED */
+  .included-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+
+  .included-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+  }
+
+  .inc-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+
+  .included-item span {
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+
+  /* FAQ */
+  .faq-list {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+    padding: 1.4rem 0;
+  }
+
+  .faq-q {
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 0.6rem;
+    font-size: 0.95rem;
+  }
+
+  .faq-a {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* CTA FINAL */
+  .cta-section {
+    text-align: center;
+    padding: 6rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: 50%;
+    transform: translateX(-50%);
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(0,201,107,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-section h2 { margin-bottom: 1rem; }
+  .cta-section p { color: var(--muted); margin-bottom: 2.5rem; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem;
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hero > * {
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero > *:nth-child(1) { animation-delay: 0.1s; }
+  .hero > *:nth-child(2) { animation-delay: 0.2s; }
+  .hero > *:nth-child(3) { animation-delay: 0.3s; }
+  .hero > *:nth-child(4) { animation-delay: 0.4s; }
+  .hero > *:nth-child(5) { animation-delay: 0.5s; }
+  .hero > *:nth-child(6) { animation-delay: 0.6s; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Vinti<span>fy</span></div>
+  <a href="https://buy.stripe.com/dRmdR87Z01Ca2942nGcwg00" class="btn-nav">Obtenir le code →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge">Disponible maintenant</div>
+  <h1>Lance ton propre bot<br><em>Vinted</em> en 24h</h1>
+  <p class="hero-sub">Code source complet, prêt à deployer. Scraping temps réel, alertes Discord, gestion des abonnés — tout est inclus.</p>
+  <div class="cta-group">
+    <a href="https://buy.stripe.com/dRmdR87Z01Ca2942nGcwg00" class="btn-primary">Acheter le code — 47€ →</a>
+    <a href="javascript:void(0)" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})" class="btn-secondary">Voir ce qui est inclus ↓</a>
+  </div>
+
+  <div class="discord-preview">
+    <div class="dc-header">
+      <div class="dc-avatar">V</div>
+      <div>
+        <span class="dc-name">VintedSniper</span>
+        <span class="dc-time">il y a moins d'1 min</span>
+      </div>
+    </div>
+    <div class="dc-embed">
+      <div class="dc-title">Nike Tech Fleece — Taille M</div>
+      <div class="dc-fields">
+        <div class="dc-field"><label>Prix</label><span style="color:#00c96b;font-weight:600;">14,00€</span></div>
+        <div class="dc-field"><label>État</label><span>Très bon</span></div>
+        <div class="dc-field"><label>Publié</label><span>-1 min</span></div>
+      </div>
+      <div class="dc-img">📸 Collage 3 photos auto-généré</div>
+      <div class="dc-buttons">
+        <div class="dc-btn fav">⭐ Favori</div>
+        <div class="dc-btn msg">💬 Message auto</div>
+        <div class="dc-btn link">🔗 Voir</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <p class="section-label">Fonctionnalités</p>
+    <h2>Tout ce dont tu as besoin,<br>déjà codé</h2>
+    <p class="section-sub">Tes clients n'auront qu'à configurer leurs marques et lancer le script.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feat-icon">⚡</div>
+        <h3>Scraping temps réel</h3>
+        <p>Les annonces sont détectées en moins de 10 minutes après leur publication sur Vinted.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">🎯</div>
+        <h3>Tri par marque & niveau</h3>
+        <p>Standard, Premium, Luxe — chaque annonce va automatiquement dans le bon salon Discord.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">📸</div>
+        <h3>Collage photo auto</h3>
+        <p>3 photos de l'article assemblées automatiquement en un visuel propre dans chaque message.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">⭐</div>
+        <h3>Système de favoris</h3>
+        <p>Les membres sauvegardent leurs annonces, les retrouvent via commande, et les exportent en CSV.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">👑</div>
+        <h3>Panel Premium intégré</h3>
+        <p>Gestion des membres premium, commandes admin, stats — tout depuis Discord.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feat-icon">💬</div>
+        <h3>Message vendeur en 1 clic</h3>
+        <p>Un bouton génère automatiquement un message poli pour contacter le vendeur.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CE QUI EST INCLUS -->
+<section style="padding: 3rem 2rem 5rem;">
+  <div class="container">
+    <p class="section-label">Livraison</p>
+    <h2>Ce que tu reçois</h2>
+
+    <div class="included-list">
+      <div class="included-item"><div class="inc-dot"></div><span>bot_discord.py — Bot principal</span></div>
+      <div class="included-item"><div class="inc-dot"></div><span>scraper_vinted.py — Scraper Selenium</span></div>
+      <div class="included-item"><div class="inc-dot"></div><span>panel_bot.py — Panel admin</span></div>
+      <div class="included-item"><div class="inc-dot"></div><span>README avec guide d'installation</span></div>
+      <div class="included-item"><div class="inc-dot"></div><span>Liste de 25 marques préconfigurées</span></div>
+      <div class="included-item"><div class="inc-dot"></div><span>Accès au code source complet</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" class="pricing-section">
+  <div class="container">
+    <p class="section-label">Tarifs</p>
+    <h2>Simple et transparent</h2>
+    <p class="section-sub">Paiement unique, code à toi pour toujours.</p>
+
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Code seul</div>
+        <div class="price-amount">47<span>€</span></div>
+        <p class="price-desc">Paiement unique — tout le code source livré immédiatement</p>
+        <ul class="price-features">
+          <li class="highlight">3 fichiers Python complets</li>
+          <li>Guide d'installation inclus</li>
+          <li>25 marques préconfigurées</li>
+          <li>Libre de modifier et revendre</li>
+        </ul>
+        <a href="https://buy.stripe.com/dRmdR87Z01Ca2942nGcwg00" class="btn-buy outlined">Acheter — 47€</a>
+      </div>
+
+      <div class="price-card featured">
+        <div class="popular-badge">Recommandé</div>
+        <div class="price-name">Code + Setup guidé</div>
+        <div class="price-amount">97<span>€</span></div>
+        <p class="price-desc">On installe ensemble — ton bot est live en moins d'1h</p>
+        <ul class="price-features">
+          <li class="highlight">Tout ce qui est dans "Code seul"</li>
+          <li class="highlight">1h de setup par vocal/screen share</li>
+          <li class="highlight">Configuration Discord incluse</li>
+          <li>Questions répondues pendant 7 jours</li>
+          <li>Personnalisation des marques</li>
+        </ul>
+        <a href="https://buy.stripe.com/4gM14m4MOcgO1501jCcwg01" class="btn-buy solid">Acheter — 97€</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section>
+  <div class="container">
+    <p class="section-label">FAQ</p>
+    <h2>Questions fréquentes</h2>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <p class="faq-q">Il faut savoir coder pour l'utiliser ?</p>
+        <p class="faq-a">Non. Le code est prêt à lancer. Il suffit d'avoir Python installé et de remplir quelques variables (token Discord, IDs de salons). Le README explique tout étape par étape.</p>
+      </div>
+      <div class="faq-item">
+        <p class="faq-q">Je peux faire payer mes propres abonnés avec ce bot ?</p>
+        <p class="faq-a">Oui, c'est exactement l'idée. Le système de rôles Premium est déjà intégré — tu gères qui voit quoi depuis le panel admin Discord.</p>
+      </div>
+      <div class="faq-item">
+        <p class="faq-q">Le bot fonctionne 24h/24 ?</p>
+        <p class="faq-a">Oui, à condition de le laisser tourner sur un serveur ou un PC allumé en permanence. On peut te conseiller des hébergeurs abordables (VPS à 5€/mois).</p>
+      </div>
+      <div class="faq-item">
+        <p class="faq-q">Comment je reçois le code après paiement ?</p>
+        <p class="faq-a">Tu rejoins le Discord, tu envoies la preuve de paiement, et tu reçois les fichiers dans les minutes qui suivent.</p>
+      </div>
+      <div class="faq-item">
+        <p class="faq-q">Je peux ajouter mes propres marques ?</p>
+        <p class="faq-a">Oui, c'est entièrement configurable. Tu modifies simplement les listes dans le fichier scraper pour ajouter ou retirer des marques.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-section">
+  <div class="container">
+    <h2>Prêt à lancer ton service ?</h2>
+    <p>Rejoins les acheteurs qui ont déjà leur bot Vinted en ligne.</p>
+    <a href="https://buy.stripe.com/dRmdR87Z01Ca2942nGcwg00" class="btn-primary" style="font-size:1.05rem; padding: 1rem 2.5rem;">Obtenir Vintify maintenant →</a>
+  </div>
+</section>
+
+<footer>
+  <p>Vintify — Code source clé en main · Paiement sécurisé · Livraison immédiate</p>
+</footer>
+
+</body>
+</html>
